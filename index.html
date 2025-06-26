@@ -1,11 +1,61 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>My Website</title>
-</head>
-<body>
-  <h1>Welcome to My GitHub Page!</h1>
-  <p>This is a simple static website hosted on GitHub Pages.</p>
-</body>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>소설 유입 통계 시각화</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 2rem auto;
+        max-width: 1280px;
+      }
+
+      label,
+      select {
+        font-size: 1rem;
+        margin-right: 1rem;
+      }
+
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 100%;
+        height: 800px; /* 고정 높이 설정 */
+      }
+
+      canvas {
+        width: 100% !important;
+        height: 100% !important; /* 부모 height와 1:1 매칭 */
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>소설별 유입 통계 시각화</h2>
+
+    <label for="novelSelect">소설 제목 선택:</label>
+    <select id="novelSelect">
+      <option value="">전체 평균 보기</option>
+    </select>
+    <label>
+      <input type="checkbox" id="dailyCheckbox" />
+      날짜별 통계 보기
+    </label>
+
+    <label for="metricSelect">지표 선택:</label>
+    <select id="metricSelect">
+      <option value="views" selected>조회수</option>
+      <option value="vote">추천</option>
+      <option value="like">선작</option>
+      <option value="alarm">알림</option>
+    </select>
+
+    <!-- ✅ 부모 div로 높이 고정 -->
+    <div class="chart-container">
+      <canvas id="chartCanvas"></canvas>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
 </html>
