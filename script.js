@@ -1,37 +1,10 @@
-// novel_stats.csv와 novel_list.csv를 불러와 소설별 시간대별 지표(조회수 등) 변화량과 날짜별 총합 통계를 시각화하는 코드
-
 let rawData = [];
 let chart;
-
 function parseCSV(csvText) {
-  const lines = csvText.trim().split("\n");
-  const headers = lines[0].split(",").map((h) => h.trim());
-  return lines.slice(1).map((line) => {
-    const values = [];
-    let insideQuotes = false;
-    let current = "";
-
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (char === '"') {
-        insideQuotes = !insideQuotes;
-      } else if (char === "," && !insideQuotes) {
-        values.push(current);
-        current = "";
-      } else {
-        current += char;
-      }
-    }
-    values.push(current);
-
-    const row = {};
-    headers.forEach((header, i) => {
-      row[header] = ["id", "timestamp", "title"].includes(header)
-        ? values[i].replace(/^"|"$/g, "")
-        : Number(values[i] || 0);
-    });
-    return row;
-  });
+  return Papa.parse(csvText, {
+    header: true,
+    skipEmptyLines: true,
+  }).data;
 }
 
 function groupById(data) {
@@ -160,6 +133,9 @@ function drawChart(timestamps, averageValues, selectedValues, metricKey) {
 
 function extractAndVisualize(selectedId, grouped, byDay = false) {
   const metric = document.getElementById("metricSelect").value;
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
+
   const timestamps = [];
   const averageValues = [];
   const selectedValues = [];
@@ -172,6 +148,7 @@ function extractAndVisualize(selectedId, grouped, byDay = false) {
     const sorted = group.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     const deltas = byDay ? computeDailyDelta(sorted) : computeDelta(sorted);
     deltas.forEach((d) => {
+      if ((start && d.timestamp < start) || (end && d.timestamp > end)) return;
       const ts = d.timestamp;
       if (!tempMap[ts]) {
         tempMap[ts] = 0;
@@ -193,7 +170,15 @@ function extractAndVisualize(selectedId, grouped, byDay = false) {
       a.timestamp.localeCompare(b.timestamp)
     );
     const deltas = byDay ? computeDailyDelta(sorted) : computeDelta(sorted);
-    const map = new Map(deltas.map((d) => [d.timestamp, d[metric]]));
+    const map = new Map(
+      deltas
+        .filter(
+          (d) =>
+            (!start || d.timestamp >= start) && (!end || d.timestamp <= end)
+        )
+        .map((d) => [d.timestamp, d[metric]])
+    );
+
     timestamps.forEach((ts) => {
       selectedValues.push(map.has(ts) ? map.get(ts) : null);
     });
@@ -214,23 +199,18 @@ function setupDropdownByList(idTitleList, grouped) {
 }
 
 function setupEvents(grouped) {
-  document.getElementById("novelSelect").addEventListener("change", () => {
+  const handler = () => {
     const id = document.getElementById("novelSelect").value;
     const byDay = document.getElementById("dailyCheckbox").checked;
     extractAndVisualize(id, grouped, byDay);
-  });
-  document.getElementById("metricSelect").addEventListener("change", () => {
-    const id = document.getElementById("novelSelect").value;
-    const byDay = document.getElementById("dailyCheckbox").checked;
-    extractAndVisualize(id, grouped, byDay);
-  });
-  document.getElementById("dailyCheckbox").addEventListener("change", () => {
-    const id = document.getElementById("novelSelect").value;
-    const byDay = document.getElementById("dailyCheckbox").checked;
-    extractAndVisualize(id, grouped, byDay);
-  });
-}
+  };
 
+  document.getElementById("novelSelect").addEventListener("change", handler);
+  document.getElementById("metricSelect").addEventListener("change", handler);
+  document.getElementById("dailyCheckbox").addEventListener("change", handler);
+  document.getElementById("startDate").addEventListener("input", handler);
+  document.getElementById("endDate").addEventListener("input", handler);
+}
 async function init() {
   const [novelListRes, statsRes] = await Promise.all([
     fetch("novel_list.csv"),
@@ -240,15 +220,15 @@ async function init() {
   const novelListText = await novelListRes.text();
   const statsText = await statsRes.text();
 
-  const novelListLines = novelListText.trim().split("\n");
-  const novelHeaders = novelListLines[0].split(",");
-  const idIndex = novelHeaders.indexOf("id");
-  const titleIndex = novelHeaders.indexOf("title");
+  const novelListParsed = Papa.parse(novelListText, {
+    header: true,
+    skipEmptyLines: true,
+  }).data;
 
-  const idTitleList = novelListLines.slice(1).map((line) => {
-    const cols = line.split(",");
-    return { id: cols[idIndex], title: cols[titleIndex].replace(/^"|"$/g, "") };
-  });
+  const idTitleList = novelListParsed.map((row) => ({
+    id: row.id,
+    title: row.title.replace(/^"|"$/g, ""),
+  }));
 
   rawData = parseCSV(statsText);
   const grouped = groupById(rawData);
@@ -256,6 +236,12 @@ async function init() {
   setupDropdownByList(idTitleList, grouped);
   setupEvents(grouped);
   extractAndVisualize("", grouped);
+
+  $("#novelSelect").addClass("select2").select2({
+    placeholder: "소설 제목을 검색하세요",
+    allowClear: true,
+    width: "400px",
+  });
 }
 
 init();
