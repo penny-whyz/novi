@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>소설 ID 제출</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 2rem;
+        max-width: 600px;
+        margin: auto;
+      }
+      input,
+      button {
+        margin-top: 1rem;
+        display: block;
+        width: 100%;
+        font-size: 1rem;
+        padding: 0.5rem;
+      }
+      .result {
+        margin-top: 2rem;
+        white-space: pre-wrap;
+        background: #f4f4f4;
+        padding: 1rem;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>소설 ID 등록 요청</h2>
+
+    <label for="novelIdInput">소설 ID:</label>
+    <input type="text" id="novelIdInput" placeholder="예: 308608" />
+
+    <label for="passwordInput">비밀번호:</label>
+    <input type="password" id="passwordInput" placeholder="비밀번호 입력" />
+
+    <button onclick="submitId()">등록 요청</button>
+
+    <div class="result" id="resultBox"></div>
+
+    <!-- 외부 JS 불러오기 -->
+    <script src="submit.js"></script>
+  </body>
+</html>
