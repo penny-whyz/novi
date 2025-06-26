@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="ko">
   <head>
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
     <meta charset="UTF-8" />
     <title>소설 유입 통계 시각화</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -35,7 +43,7 @@
     <h2>소설별 유입 통계 시각화</h2>
 
     <label for="novelSelect">소설 제목 선택:</label>
-    <select id="novelSelect">
+    <select id="novelSelect" class="select2">
       <option value="">전체 평균 보기</option>
     </select>
     <label>
@@ -43,13 +51,22 @@
       날짜별 통계 보기
     </label>
 
-    <label for="metricSelect">지표 선택:</label>
-    <select id="metricSelect">
-      <option value="views" selected>조회수</option>
-      <option value="vote">추천</option>
-      <option value="like">선작</option>
-      <option value="alarm">알림</option>
-    </select>
+    <div>
+      <label for="startDate">시작 날짜 (YYYYMMDD):</label>
+      <input type="text" id="startDate" placeholder="예: 20250601" />
+
+      <label for="endDate">종료 날짜 (YYYYMMDD):</label>
+      <input type="text" id="endDate" placeholder="예: 20250626" />
+    </div>
+    <div>
+      <label for="metricSelect">지표 선택:</label>
+      <select id="metricSelect">
+        <option value="views" selected>조회수</option>
+        <option value="vote">추천</option>
+        <option value="like">선작</option>
+        <option value="alarm">알림</option>
+      </select>
+    </div>
 
     <!-- ✅ 부모 div로 높이 고정 -->
     <div class="chart-container">
